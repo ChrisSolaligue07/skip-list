@@ -3,4 +3,4 @@ project(SkipList_ch)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(SkipList_ch main.cpp)
+add_executable(SkipList_ch src/main.cpp)
