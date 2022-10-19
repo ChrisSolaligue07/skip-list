@@ -41,7 +41,7 @@ int main() {
 
     std::cout << "Insertando datos..." << std::endl;
     for (int i = 0; i < 1000; i++) {
-        int _rand = rand()%(last+1-first)+first;
+        int _rand = rand() % (last + 1 - first) + first;
         test.push_back(_rand);
         sl.insert(_rand);
     }
