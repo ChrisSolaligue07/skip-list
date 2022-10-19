@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <ctime>
 #include "skip_list.h"
 
 
@@ -33,11 +34,14 @@ int main() {
     std::cout << "Datos Eliminados" << std::endl;
     sl.print();*/
 
-    SkipList<int> sl(8);
+    SkipList<int> sl(12);
     std::vector<int> test;
+    int first = 1, last = 1000;
+    srand(time(nullptr));
+
     std::cout << "Insertando datos..." << std::endl;
-    for (int i = 0; i < 1200; i++) {
-        int _rand = get_random_int();
+    for (int i = 0; i < 1000; i++) {
+        int _rand = rand()%(last+1-first)+first;
         test.push_back(_rand);
         sl.insert(_rand);
     }
