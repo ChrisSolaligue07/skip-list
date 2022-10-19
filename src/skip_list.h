@@ -8,6 +8,7 @@ template<class ElemType>
 class SkipList {
 public:
     explicit SkipList(int max_lvl);
+
     ~SkipList();
 
     bool get_random_bool();
@@ -93,15 +94,19 @@ bool SkipList<ElemType>::insert(ElemType key) {
     }   // Este nivel determinara en que nivel de las LE. se insertara el dato.
 
     if (current_lvl < level) {
-        prev[current_lvl] = &header;
-        level = current_lvl++;
-
+        // Si el nuevo nivel que tendrá el nodo a insertar es mayor que el nivel actual de la SkipList
+        // se hace que el nodo prev o antecesor apunte al head.
+        for (int i = current_lvl; i < level; i++) {
+            prev[i] = &header;
+        }
+        current_lvl = level;    // Se actualiza el nuevo nivel
     }
+
     auto *new_node = new node<ElemType>(level, key);    // Generamos un nuevo nodo torré con su respectivo key.
     for (unsigned int i = 0; i < level; ++i) {
         new_node->forward[i] = prev[i]->forward[i];
         prev[i]->forward[i] = new_node;
-    }
+    }   // Modificación de los punteros.
     return true;
 }
 

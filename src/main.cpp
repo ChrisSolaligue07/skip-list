@@ -12,7 +12,7 @@ int get_random_int() {
 }
 
 int main() {
-    SkipList<int> sl(8);
+    /*SkipList<int> sl(8);
     std::vector<int> test;
     std::cout << "Insertando datos..." << std::endl;
     for (int i = 0; i < 50; i++) {
@@ -26,6 +26,26 @@ int main() {
     std::cout << std::endl << std::endl;
     sl.print();
 
+    std::cout << "Eliminando datos." << std::endl;
+    for (int i: test) {
+        sl.erase(i);
+    }
+    std::cout << "Datos Eliminados" << std::endl;
+    sl.print();*/
+
+    SkipList<int> sl(8);
+    std::vector<int> test;
+    std::cout << "Insertando datos..." << std::endl;
+    for (int i = 0; i < 1200; i++) {
+        int _rand = get_random_int();
+        test.push_back(_rand);
+        sl.insert(_rand);
+    }
+    std::cout << "Datos Insertados" << std::endl;
+    std::cout << "Lista de datos que se quiso insertar ..." << std::endl;
+    std::copy(test.begin(), test.end(), std::ostream_iterator<int>(std::cout, " "));
+    std::cout << std::endl << std::endl;
+    sl.print();
     std::cout << "Eliminando datos." << std::endl;
     for (int i: test) {
         sl.erase(i);
