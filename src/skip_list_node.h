@@ -1,10 +1,9 @@
-//
-// Created by chris on 9/10/2022.
-//
-
 #ifndef SKIPLIST_CH_SKIP_LIST_NODE_H
 #define SKIPLIST_CH_SKIP_LIST_NODE_H
-template <class ElemType>
+
+#include <vector>
+
+template<class ElemType>
 struct node {
     std::vector<node *> forward;
     ElemType key; //  key

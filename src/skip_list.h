@@ -1,18 +1,14 @@
-//
-// Created by chris on 8/10/2022.
-//
-
 #ifndef SKIPLIST_CH_SKIP_LIST_H
 #define SKIPLIST_CH_SKIP_LIST_H
 
 #include "skip_list_node.h"
 #include <random>
-#include <functional>
 
 template<class ElemType>
 class SkipList {
 public:
     explicit SkipList(int max_lvl);
+    ~SkipList();
 
     bool get_random_bool();
 
@@ -20,18 +16,18 @@ public:
 
     bool erase(ElemType key);
 
-    node<ElemType> *find(std::vector<node<ElemType> *> *predecessor, ElemType key);
+    node<ElemType> *find(std::vector<node<int> *> *prev, ElemType key);
 
     void print();
 
-    node<ElemType> header;  // header(max_lvl, key=infinito)
+    node<ElemType> header;  // header(max_lvl, key={}})
     int current_lvl;        // 1
     int max_lvl;            // n
 };
 
 template<class ElemType>
 SkipList<ElemType>::SkipList(int max_lvl)
-        : max_lvl(max_lvl), header(max_lvl, -1), current_lvl(1) {}
+        : max_lvl(max_lvl), header(max_lvl, {}), current_lvl(1) {}
 
 template<class ElemType>
 bool SkipList<ElemType>::get_random_bool() {
@@ -45,21 +41,6 @@ template<class ElemType>
 void SkipList<ElemType>::print() {
     typedef node<ElemType> *nd_p;
     using std::cout, std::endl;
-
-    nd_p it = &header;
-    for (int j = 0; j <= max_lvl - 1; j++) {
-        cout << "[" << j << "]";
-    }
-    cout << endl;
-    while (it->forward[0] != nullptr) {
-        for (unsigned int i = 0; i < it->forward.size(); i++) {
-            if (it->forward[i] != nullptr)
-                std::cout << " " << it->forward[i]->key << " ";
-        }
-        std::cout << std::endl;
-        it = it->forward[0];
-    }
-    cout << endl;
     nd_p p = &header;
     for (int i = max_lvl - 1; i >= 0; i--) {
         cout << "[" << i << "] -> ";
@@ -78,69 +59,79 @@ void SkipList<ElemType>::print() {
 }
 
 template<class ElemType>
-node<ElemType> *SkipList<ElemType>::find(std::vector<node<ElemType> *> *predecessor, ElemType key) {
-    predecessor->resize(max_lvl, nullptr);
-    node<ElemType> *it = &header;
+node<ElemType> *SkipList<ElemType>::find(std::vector<node<int> *> *prev, ElemType key) {
+    prev->resize(max_lvl, nullptr);
+    node<ElemType> *next = &header;
     for (int i = current_lvl - 1; 0 <= i; --i) {
-        while (it->forward[i] != nullptr && it->forward[i]->key < key) {
-            it = it->forward[i];
+        while (next->forward[i] != nullptr && next->forward[i]->key < key) {
+            next = next->forward[i];
         }
-        (*predecessor)[i] = it;
+        (*prev)[i] = next;
+        // [prev] se queda con el valor anterior al que se busca
+        // asi mismo almacena los nodos recorridos anteriormente.
     }
-    it = it->forward[0];
-
-    return it;
+    next = next->forward[0];    // obtiene el siguiente número del cual se busca
+    // [prev] -> [-] -> [next]
+    return next;
 }
 
 template<class ElemType>
 bool SkipList<ElemType>::insert(ElemType key) {
-    std::vector<node<ElemType> *> predecessor;
-    node<ElemType> *it = find(&predecessor, key);
+    std::vector<node<ElemType> *> prev; // vector con los nodos previos al que se quiere insertar
+    node<ElemType> *next = find(&prev, key);    // nodo siguiente al nodo que se quiere insertar
 
-    if (it != nullptr && it->key == key) {
+    if (next != nullptr && next->key == key) {
+        // si nodo next es diferente de nullptr y la key siguiente es igual de la key a insertar
+        // no se inserta nada, retorna false.
         return false;
     }
 
     unsigned int level = 1;
     while (get_random_bool() == true && level < max_lvl) {
-        ++level;
-    }
+        // si la "moneda" cae cara, el nivel va aumentando, caso contrario no aumenta.
+        level++;
+    }   // Este nivel determinara en que nivel de las LE. se insertara el dato.
 
     if (current_lvl < level) {
-        predecessor[current_lvl] = &header;
-        level = ++current_lvl;
-    }
+        prev[current_lvl] = &header;
+        level = current_lvl++;
 
-    auto *new_node = new node<ElemType>(level, ElemType(key));
+    }
+    auto *new_node = new node<ElemType>(level, key);    // Generamos un nuevo nodo torré con su respectivo key.
     for (unsigned int i = 0; i < level; ++i) {
-        new_node->forward[i] = predecessor[i]->forward[i];
-        predecessor[i]->forward[i] = new_node;
+        new_node->forward[i] = prev[i]->forward[i];
+        prev[i]->forward[i] = new_node;
     }
-
     return true;
 }
 
 template<class ElemType>
 bool SkipList<ElemType>::erase(ElemType key) {
-    std::vector<node<ElemType> *> predecessor;
-    node<ElemType> *it = find(&predecessor, key);
-
-    if (it != nullptr and it->key == key) {
+    std::vector<node<ElemType> *> prev;
+    node<ElemType> *next = find(&prev, key);
+    if (next != nullptr && next->key == key) {
         for (int i = 0; i <= current_lvl - 1; i++) {
-            if (predecessor[i]->forward[i] != it)
+            if (prev[i]->forward[i] != next)
                 break;
-            predecessor[i]->forward[i] = it->forward[i];
+            prev[i]->forward[i] = next->forward[i];
         }
-
-        while (current_lvl - 1 > 0 && header.forward[current_lvl - 1] == 0) {
-            current_lvl--;
-        }
-        std::cout << "Successfully deleted key " << key << "\n";
+        while (current_lvl - 1 > 0 && header.forward[current_lvl - 1] == nullptr) {
+            current_lvl--;  // Se decremente hasta que llegue a un nivel adecuado
+        }   // Si el nivel actual es diferente de nulo entonces se encuentra en un nivel adecuado.
         return true;
     } else {
         return false;
     }
 }
 
+template<class ElemType>
+SkipList<ElemType>::~SkipList() {
+    auto *node = &header;
+    while (node->forward[0]) {
+        auto *tmp = node->forward[0];
+        delete node;
+        node = tmp;
+    }
+}
 
 #endif //SKIPLIST_CH_SKIP_LIST_H

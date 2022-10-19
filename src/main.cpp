@@ -1,17 +1,36 @@
 #include <iostream>
-#include <vector>
+#include <algorithm>
+#include <iterator>
 #include "skip_list.h"
 
+
+int get_random_int() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> distribution(1, 100);
+    return distribution(gen);
+}
+
 int main() {
-    SkipList<int> sl(5);
-    sl.insert(3);
-    sl.insert(4);
-    sl.insert(6);
-    sl.insert(8);
-    sl.insert(9);
-    sl.insert(10);
+    SkipList<int> sl(8);
+    std::vector<int> test;
+    std::cout << "Insertando datos..." << std::endl;
+    for (int i = 0; i < 50; i++) {
+        int _rand = get_random_int();
+        test.push_back(_rand);
+        sl.insert(_rand);
+    }
+    std::cout << "Datos Insertados" << std::endl;
+    std::cout << "Lista de datos que se quiso insertar ..." << std::endl;
+    std::copy(test.begin(), test.end(), std::ostream_iterator<int>(std::cout, " "));
+    std::cout << std::endl << std::endl;
     sl.print();
-    sl.erase(8);
+
+    std::cout << "Eliminando datos." << std::endl;
+    for (int i: test) {
+        sl.erase(i);
+    }
+    std::cout << "Datos Eliminados" << std::endl;
     sl.print();
     return 0;
 }
